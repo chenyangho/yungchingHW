@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using System.Collections.Immutable;
+using System.Linq;
 using System.Linq.Expressions;
+using yungchingHW.Dtos;
 using yungchingHW.Models;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -21,9 +24,24 @@ namespace yungchingHW.Controllers
 
         // GET: api/<HomeWorkController>
         [HttpGet]
-        public ActionResult<IEnumerable<Customer>> Get()
+        public IEnumerable<CustomerDto> Get()
         {
-            return _pubsContext.Customers.ToList();
+            var result = _pubsContext.Customers
+                .Select(data => new CustomerDto
+                {
+                    CustomerId = data.CustomerId,
+                    CompanyName = data.CompanyName,
+                    ContactName = data.ContactName,
+                    ContactTitle = data.ContactTitle,
+                    Address = data.Address,
+                    City = data.City,
+                    Region = data.Region,
+                    PostalCode = data.PostalCode,
+                    Country = data.Country,
+                    Phone = data.Phone,
+                    Fax = data.Fax
+                });
+            return result;
         }
 
         // GET api/<HomeWorkController>/5
