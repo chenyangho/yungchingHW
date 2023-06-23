@@ -11,9 +11,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
-builder.Services.AddDbContext<WideWorldImportersContext>(options =>
-options.UseSqlServer(builder.Configuration.GetConnectionString("WideWorldImportersDatabase")));
-
+builder.Services.AddDbContext<PubsContext>(options =>
+options.UseSqlServer(builder.Configuration.GetConnectionString("PubsDatabase")));
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

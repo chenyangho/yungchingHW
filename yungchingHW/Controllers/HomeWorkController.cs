@@ -1,4 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using System.Linq.Expressions;
 using yungchingHW.Models;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -10,24 +13,24 @@ namespace yungchingHW.Controllers
     public class HomeWorkController : ControllerBase
     {
 
-        private readonly WideWorldImportersContext _wideWorldImportersContext;
-        public HomeWorkController(WideWorldImportersContext wideWorldImportersContext)
+        private readonly PubsContext _pubsContext;
+        public HomeWorkController(PubsContext pubsContext)
         {
-            _wideWorldImportersContext = wideWorldImportersContext;
+            _pubsContext = pubsContext;
         }
 
         // GET: api/<HomeWorkController>
         [HttpGet]
-        public ActionResult<IEnumerable<SpecialDeal>> Get()
+        public ActionResult<IEnumerable<Customer>> Get()
         {
-            return _wideWorldImportersContext.SpecialDeals.ToList();
+            return _pubsContext.Customers.ToList();
         }
 
         // GET api/<HomeWorkController>/5
         [HttpGet("{id}")]
-        public ActionResult<City> Get(int id)
+        public ActionResult<Customer> Get(string id)
         {
-            var result = _wideWorldImportersContext.Cities.Find(id);
+            var result = _pubsContext.Customers.Find(id);
             if (result == null)
             {
                 return NotFound("Can't find data");
@@ -37,24 +40,55 @@ namespace yungchingHW.Controllers
 
         // POST api/<HomeWorkController>
         [HttpPost]
-        public ActionResult<City> Post([FromBody] City value)
+        public ActionResult<Customer> Post([FromBody] Customer value)
         {
-            _wideWorldImportersContext.Cities.Add(value);
-            _wideWorldImportersContext.SaveChanges();
+            _pubsContext.Customers.Add(value);
+            _pubsContext.SaveChanges();
 
-            return CreatedAtAction(nameof(Get), new { id = value.CityId }, value);
+            return CreatedAtAction(nameof(Get), new { id = value.CustomerId }, value);
         }
 
         // PUT api/<HomeWorkController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public ActionResult<Customer> Put(string id, [FromBody] Customer value)
         {
+            if (id != value.CustomerId)
+            {
+                return BadRequest();
+            }
+
+            _pubsContext.Entry(value).State = EntityState.Modified;
+
+            try{
+                _pubsContext.SaveChanges();
+            }
+            catch(DbUpdateException){
+                if (!_pubsContext.Customers.Any(e=>e.CustomerId == id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    return StatusCode(StatusCodes.Status400BadRequest);
+                }
+            }
+
+            return NoContent();
         }
 
         // DELETE api/<HomeWorkController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public ActionResult<Customer> Delete(string id)
         {
+            var delete = _pubsContext.Customers.Find(id);
+            if (delete == null)
+            {
+                return NotFound();
+            }
+
+            _pubsContext.Remove(delete);
+            _pubsContext.SaveChanges();
+            return NoContent();
         }
     }
 }
